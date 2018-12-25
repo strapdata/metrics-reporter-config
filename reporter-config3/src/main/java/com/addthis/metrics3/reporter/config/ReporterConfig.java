@@ -46,6 +46,8 @@ public class ReporterConfig extends AbstractReporterConfig {
     @Valid
     private List<InfluxDBReporterConfig> influxdb;
     @Valid
+    private List<ElasticsearchReporterConfig> elasticsearch;
+    @Valid
     private List<RiemannReporterConfig> riemann;
     @Valid
     private List<StatsDReporterConfig> statsd;
@@ -92,6 +94,14 @@ public class ReporterConfig extends AbstractReporterConfig {
 
     public void setInfluxdb(List<InfluxDBReporterConfig> influxdb) {
         this.influxdb = influxdb;
+    }
+
+    public List<ElasticsearchReporterConfig> getElasticsearch() {
+        return elasticsearch;
+    }
+
+    public void setElasticsearch(List<ElasticsearchReporterConfig> elasticsearch) {
+        this.elasticsearch = elasticsearch;
     }
 
     public List<RiemannReporterConfig> getRiemann() {
@@ -213,6 +223,20 @@ public class ReporterConfig extends AbstractReporterConfig {
         return !failures;
     }
 
+    public boolean enableElasticsearch(MetricRegistry registry) {
+        boolean failures = false;
+        if (elasticsearch == null) {
+            log.debug("Asked to enable elasticsearch, but it was not configured");
+            return false;
+        }
+        for (ElasticsearchReporterConfig elasticsearchConfig : elasticsearch) {
+            if (!elasticsearchConfig.enable(registry)) {
+                failures = true;
+            }
+        }
+        return !failures;
+    }
+
     public boolean enableRiemann(MetricRegistry registry) {
         boolean failures = false;
         if (riemann == null) {
@@ -270,6 +294,9 @@ public class ReporterConfig extends AbstractReporterConfig {
             enabled = true;
         }
         if (influxdb != null && enableInfluxdb(registry)) {
+            enabled = true;
+        }
+        if (elasticsearch != null && enableElasticsearch(registry)) {
             enabled = true;
         }
         if (riemann != null && enableRiemann(registry)) {

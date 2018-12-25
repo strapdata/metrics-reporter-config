@@ -3,6 +3,7 @@ target/
 .project
 .settings/
 .idea/
+bin/
 *.iml
 pom.xml.versionsBackup
 .#*
